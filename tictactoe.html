@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic-Tac-Toe game</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100 flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 sm:p-8">
+
+        <!-- Heading -->
+        <div class="text-center mb-6">
+            <h1 class="text-4xl font-extrabold text-indigo-600">
+                Tic-Tac-Toe
+            </h1>
+
+            <p class="text-gray-500 mt-2">
+                Play with your friend!
+            </p>
+        </div>
+
+        <!-- Player Status -->
+        <div class="bg-indigo-50 rounded-xl p-4 mb-5 text-center">
+            <p id="status"
+               class="text-lg font-bold text-indigo-700">
+                Player X's Turn
+            </p>
+        </div>
+
+        <!-- Game Board -->
+        <div id="board"
+             class="grid grid-cols-3 gap-3 mb-6">
+
+            <button class="cell"></button>
+            <button class="cell"></button>
+            <button class="cell"></button>
+
+            <button class="cell"></button>
+            <button class="cell"></button>
+            <button class="cell"></button>
+
+            <button class="cell"></button>
+            <button class="cell"></button>
+            <button class="cell"></button>
+
+        </div>
+
+        <!-- Score -->
+        <div class="grid grid-cols-2 gap-4 mb-6">
+
+            <div class="bg-blue-50 rounded-xl p-4 text-center">
+                <p class="text-gray-600 font-medium">Player X</p>
+                <p id="scoreX"
+                   class="text-3xl font-bold text-blue-600">0</p>
+            </div>
+
+            <div class="bg-pink-50 rounded-xl p-4 text-center">
+                <p class="text-gray-600 font-medium">Player O</p>
+                <p id="scoreO"
+                   class="text-3xl font-bold text-pink-600">0</p>
+            </div>
+
+        </div>
+
+        <!-- Restart Button -->
+        <button id="restart"
+                class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition duration-300">
+            Restart Game
+        </button>
+
+    </div>
+
+    <script>
+        // Select HTML elements
+        const cells = document.querySelectorAll(".cell");
+        const statusText = document.getElementById("status");
+        const restartButton = document.getElementById("restart");
+        const scoreXText = document.getElementById("scoreX");
+        const scoreOText = document.getElementById("scoreO");
+
+        // Game variables
+        let currentPlayer = "X";
+        let gameActive = true;
+        let board = ["", "", "", "", "", "", "", "", ""];
+
+        let scoreX = 0;
+        let scoreO = 0;
+
+        // Winning combinations
+        const winningCombinations = [
+            [0, 1, 2],
+            [3, 4, 5],
+            [6, 7, 8],
+            [0, 3, 6],
+            [1, 4, 7],
+            [2, 5, 8],
+            [0, 4, 8],
+            [2, 4, 6]
+        ];
+
+        // Style game cells
+        cells.forEach((cell) => {
+            cell.className =
+                "cell aspect-square bg-indigo-50 hover:bg-indigo-100 rounded-2xl text-5xl sm:text-6xl font-extrabold flex items-center justify-center transition duration-200";
+        });
+
+        // Handle cell click
+        cells.forEach((cell, index) => {
+            cell.addEventListener("click", () => {
+
+                // Do not allow invalid moves
+                if (board[index] !== "" || !gameActive) {
+                    return;
+                }
+
+                // Add player's mark
+                board[index] = currentPlayer;
+                cell.textContent = currentPlayer;
+
+                // Apply player colors
+                if (currentPlayer === "X") {
+                    cell.classList.add("text-blue-600");
+                } else {
+                    cell.classList.add("text-pink-600");
+                }
+
+                // Check for winner
+                checkWinner();
+            });
+        });
+
+        // Check game result
+        function checkWinner() {
+
+            let winner = false;
+
+            for (const combination of winningCombinations) {
+
+                const [a, b, c] = combination;
+
+                if (
+                    board[a] !== "" &&
+                    board[a] === board[b] &&
+                    board[b] === board[c]
+                ) {
+                    winner = true;
+
+                    // Highlight winning cells
+                    cells[a].classList.add("!bg-green-200");
+                    cells[b].classList.add("!bg-green-200");
+                    cells[c].classList.add("!bg-green-200");
+
+                    break;
+                }
+            }
+
+            if (winner) {
+
+                statusText.textContent =
+                    "Player " + currentPlayer + " Wins! 🎉";
+
+                statusText.classList.remove("text-indigo-700");
+                statusText.classList.add("text-green-600");
+
+                gameActive = false;
+
+                // Update score
+                if (currentPlayer === "X") {
+                    scoreX++;
+                    scoreXText.textContent = scoreX;
+                } else {
+                    scoreO++;
+                    scoreOText.textContent = scoreO;
+                }
+
+                return;
+            }
+
+            // Check draw
+            if (!board.includes("")) {
+
+                statusText.textContent = "It's a Draw! 🤝";
+                gameActive = false;
+
+                return;
+            }
+
+            // Switch player
+            currentPlayer = currentPlayer === "X" ? "O" : "X";
+
+            statusText.textContent =
+                "Player " + currentPlayer + "'s Turn";
+        }
+
+        // Restart current round
+        function restartGame() {
+
+            board = ["", "", "", "", "", "", "", "", ""];
+            currentPlayer = "X";
+            gameActive = true;
+
+            statusText.textContent = "Player X's Turn";
+
+            statusText.classList.remove(
+                "text-green-600"
+            );
+
+            statusText.classList.add("text-indigo-700");
+
+            cells.forEach((cell) => {
+                cell.textContent = "";
+
+                cell.classList.remove(
+                    "text-blue-600",
+                    "text-pink-600",
+                    "!bg-green-200"
+                );
+            });
+        }
+
+        // Restart button event
+        restartButton.addEventListener("click", restartGame);
+    </script>
+</body>
+</html>
